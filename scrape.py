@@ -54,3 +54,20 @@ class MailSpider(scrapy.Spider):
             process = CrawlerProcess({'USER_AGENT': 'Mozilla/5.0'})
             process.crawl(MailSpider, start_urls=google_urls, path=path, reject=reject)
             process.start()
+
+# save those emails in a CSV file
+def ask_user(question):
+    response = input(question + ' y/n' + '\n')
+    if response == 'y':
+        return True
+    else:
+        return False
+
+def create_file(path):
+    response = False
+    if os.path.exists(path):
+        response = ask_user('File already exists, replace?')
+        if response == False: return
+
+    with open(path, 'wb') as file:
+        file.close
