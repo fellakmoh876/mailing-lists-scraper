@@ -71,3 +71,32 @@ def create_file(path):
 
     with open(path, 'wb') as file:
         file.close
+
+# put everything together
+def get_info(tag, n, language, path, reject=[]):
+
+    create_file(path)
+    df = pd.DataFrame(columns=['email', 'link'], index=[0])
+    df.to_csv(path, mode='w', header=True)
+
+    print('Collecting Google urls...')
+    google_urls = get_urls(tag, n, language)
+
+    print('Searching for emails...')
+    process = CrawlerProcess({'USER_AGENT': 'Mozilla/5.0'})
+    process.crawl(MailSpider, start_urls=google_urls, path=path, reject=reject)
+    process.start()
+
+    print('Cleaning emails...')
+    df = pd.read_csv(path, index_col=0)
+    df.columns = ['email', 'link']
+    df = df.drop_duplicates(subset='email')
+    df = df.reset_index(drop=True)
+    df.to_csv(path, mode='w', header=True)
+
+    return df
+
+bad_words = ['facebook', 'instagram', 'youtube', 'twitter', 'wiki']
+df = get_info('mastering studio london', 300, 'pt', 'studios.csv', reject=bad_words)
+
+df.head()
